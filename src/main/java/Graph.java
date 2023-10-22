@@ -1,8 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Graph {
 
@@ -20,6 +19,11 @@ public class Graph {
 
     public void ajouterArete(Arete arete) {
         aretes.add(arete);
+    }
+
+    Graph(String nomFichierSommets, String nomFichierAretes ){
+        sommets = lireSommetsDepuisFichier(nomFichierSommets);
+        aretes = lireAretesDepuisFichier(nomFichierSommets, nomFichierAretes);
     }
 
     public static void afficherSommets(List<Sommet> sommets) {
@@ -74,7 +78,7 @@ public class Graph {
 
     /**
      * La méthode permet de créer une liste sommet depuis un fichier
-     * @param nomFichier
+     * @param
      */
     public List<Arete> lireAretesDepuisFichier(String nomFichierSommets, String nomFichierAretes) {
         List<Arete> aretes = new ArrayList<>();
@@ -115,4 +119,52 @@ public class Graph {
         }
         return aretes;
     }
+
+
+
+        public boolean estConnexe() {
+            // Sélectionnez un sommet arbitraire (par exemple, le premier sommet)
+            Sommet sommetDeDepart = sommets.get(0);
+
+            // Utilisez BFS pour parcourir le graphe à partir du sommet de départ
+            Set<Sommet> sommetsVisites = new HashSet<>();
+            Queue<Sommet> fileAttente = new LinkedList<>();
+
+            fileAttente.add(sommetDeDepart);
+            sommetsVisites.add(sommetDeDepart);
+
+            while (!fileAttente.isEmpty()) {
+                Sommet sommetCourant = fileAttente.poll();
+
+                // Pour chaque sommet adjacent non visité, ajoutez-le à la file d'attente
+                for (Sommet voisin : obtenirVoisinsNonVisites(sommetCourant, sommetsVisites)) {
+                    fileAttente.add(voisin);
+                    sommetsVisites.add(voisin);
+                }
+            }
+
+            // Si tous les sommets ont été visités, le graphe est connexe
+            return sommetsVisites.size() == sommets.size();
+        }
+
+        private List<Sommet> obtenirVoisinsNonVisites(Sommet sommet, Set<Sommet> sommetsVisites) {
+            List<Sommet> voisins = new ArrayList<>();
+
+            // Remplacez ceci par la logique pour obtenir les voisins du sommet depuis vos arêtes
+            for (Arete arete : aretes) {
+                if (arete.sommet1.equals(sommet) && !sommetsVisites.contains(arete.sommet2)) {
+                    voisins.add(arete.sommet2);
+                } else if (arete.sommet2.equals(sommet) && !sommetsVisites.contains(arete.sommet1)) {
+                    voisins.add(arete.sommet1);
+                }
+            }
+
+            return voisins;
+        }
+
+
+
+
+
+
 }
