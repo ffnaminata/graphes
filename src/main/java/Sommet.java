@@ -21,6 +21,7 @@ public class Sommet {
         this.branchement = branchement;
     }
 
+
     @Override
     public String toString() {
         return numero + " " + nom;

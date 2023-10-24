@@ -4,14 +4,14 @@
 0004;Anatole France;3;False;0
 0005;Anvers;2;False;0
 0006;Argentine;1;False;0
-0007;Arts et Métiers;11;False;0
-0008;Arts et Métiers;3;False;0
+7;Arts et Métiers;11;False;0
+8;Arts et Métiers;3;False;0
 0009;Assemblée Nationale;12;False;0
 0010;Aubervilliers-Pantin, Quatre Chemins;7;False;0
 0011;Avenue Émile Zola;10;False;0
 0012;Avron;2;False;0
-0013;Barbès Rochechouart;2;False;0
-0014;Barbès Rochechouart;4;False;0
+13;Barbès Rochechouart;2;False;0
+14;Barbès Rochechouart;4;False;0
 0015;Basilique de Saint-Denis;13;False;1
 0016;Bastille;1;False;0
 0017;Bastille;5;False;0
