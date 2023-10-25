@@ -21,11 +21,11 @@ public class Graph {
     }
 
     public void ajouterSommet(Sommet sommet) {
-        sommets.add(sommet);
+        this.sommets.add(sommet);
     }
 
     public void ajouterArete(Arete arete) {
-        aretes.add(arete);
+        this.aretes.add(arete);
     }
 
 
@@ -55,6 +55,8 @@ public class Graph {
         }
     }
 
+
+
     /**
      * La méthode permet de créer une liste sommet depuis un fichier
      * @param nomFichier
@@ -76,6 +78,7 @@ public class Graph {
 
                     Sommet sommet = new Sommet(numero, nom, ligne2, terminus, branchement);
                     sommets.add(sommet);
+
 
                 }
             }
@@ -189,7 +192,7 @@ public class Graph {
             return;
         }
 
-        // Initialisation des distances
+        // Initialfisation des distances
         Map<Sommet, Integer> distances = new HashMap<>();
         Map<Sommet, Sommet> predecesseurs = new HashMap<>();
 
@@ -219,25 +222,20 @@ public class Graph {
             Sommet sommet2 = arete.sommet2;
             int poids = arete.temps;
 
-            if (distances.get(sommet1) != null && distances.get(sommet1) + poids < distances.get(sommet2)) {
+            if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
                 System.out.println("Le graphe contient un cycle de poids négatif.");
                 return;
             }
         }
 
-        // Affichage du plus court chemin
-        System.out.println("Chemin le plus court depuis le sommet source " + source.nom + " vers " + cible.nom + ":");
-        Integer distanceCible = distances.get(cible);
-        if (distanceCible == null || distanceCible == Integer.MAX_VALUE) {
-            System.out.println("Aucun chemin trouvé.");
-        } else {
-            List<Sommet> chemin = construireChemin(source, cible, predecesseurs);
-            System.out.println("Distance = " + distanceCible);
-            System.out.println("Chemin = " );
-            for (Sommet sommet : chemin){
-                System.out.println(sommet.nom + " Ligne "+ sommet.ligne + "->");
-            }
+        System.out.println("Chemin le plus court depuis le sommet " + source.nom+ " vers " + cible.nom + ":");
+        System.out.println("Distance = " + distances.get(cible));
+        List<Sommet> chemin = construireChemin(source, cible, predecesseurs);
+        System.out.print("Chemin = ");
+        for (Sommet sommet : chemin) {
+            System.out.print(sommet.nom + " "+sommet.ligne+ " -> ");
         }
+        System.out.println();
     }
 
 
@@ -297,71 +295,134 @@ public class Graph {
     }
 
 
+
     private List<Sommet> construireChemin(Sommet source, Sommet cible, Map<Sommet, Sommet> predecesseurs) {
         List<Sommet> chemin = new ArrayList<>();
         Sommet sommetCourant = cible;
 
+
+
         while (sommetCourant != null) {
             chemin.add(sommetCourant);
             sommetCourant = predecesseurs.get(sommetCourant);
-        }
 
-        Collections.reverse(chemin);
-        return chemin;
-    }
-
-    public Graph rendreGrapheConnexe() {
-        Graph grapheConnexe = new Graph();
-
-        // Copiez tous les sommets du graphe d'origine dans le graphe connexe
-        for (Sommet sommet : sommets) {
-            grapheConnexe.ajouterSommet(sommet);
-        }
-
-        // Utilisez une approche simple pour ajouter des arêtes manquantes
-        // Vous pouvez personnaliser cette logique selon vos besoins
-        for (int i = 0; i < sommets.size(); i++) {
-            for (int j = i + 1; j < sommets.size(); j++) {
-                Sommet sommet1 = sommets.get(i);
-                Sommet sommet2 = sommets.get(j);
-                boolean arreteExistante = false;
-
-                for (Arete arete : aretes) {
-                    if ((arete.sommet1.equals(sommet1) && arete.sommet2.equals(sommet2)) ||
-                            (arete.sommet1.equals(sommet2) && arete.sommet2.equals(sommet1))) {
-                        arreteExistante = true;
-                        break;
-                    }
-                }
-
-                if (!arreteExistante) {
-                    // Si l'arête n'existe pas, ajoutez-la au graphe connexe
-                    grapheConnexe.ajouterArete(new Arete(sommet1, sommet2, 1));
-                    //grapheConnexe.ajouterArete(new Arete( sommet2,sommet1, 1));
-                }
+            if (sommetCourant == source) {
+                chemin.add(sommetCourant);
+                break; // Arrêtez si le sommet courant est le sommet source
             }
         }
 
-        return grapheConnexe;
+
+
+        return chemin;
     }
 
 
-    public Graph ajouterAretesInverses() {
-        List<Arete> arretesInverses = new ArrayList<>();
 
-        // Itérer sur toutes les arêtes existantes
-        for (Arete arete : aretes) {
-            // Créer l'arête inverse en échangeant les sommets et en gardant le même poids (dans cet exemple, on suppose que le poids est un entier)
-            Arete areteInverse = new Arete(arete.getSommet2(), arete.getSommet1(), arete.temps);
+    public Graph rendreFortementConnexe(Sommet sommetSource) {
+        // Étape 1 : Exécutez une recherche en profondeur (DFS) pour obtenir l'ordre des sommets dans le graphe original
+        List<Sommet> ordre = new ArrayList<>(); //On créer une liste de sommet qui s'appelle ordre
+        Set<Sommet> sommetsVisites = new HashSet<>();
 
-            // Ajouter l'arête inverse à la liste des arêtes inverses
-            arretesInverses.add(areteInverse);
+        if (!sommetSource.equals(sommets.get(0))) {
+            parcoursEnProfondeur(sommetSource, sommetsVisites, ordre);
         }
 
-        // Ajouter toutes les arêtes inverses au graphe
-        aretes.addAll(arretesInverses);
-        return this;
+        for (Sommet sommet : sommets) {
+            if (!sommetsVisites.contains(sommet)) {
+                parcoursEnProfondeur(sommet, sommetsVisites, ordre);
+            }
+        }
+
+        // Étape 2 : Inverser les arêtes du graphe
+        Graph grapheInverse = inverserAretes();
+
+        // Étape 3 : Exécutez une nouvelle DFS sur le graphe inversé en utilisant l'ordre obtenu à l'étape 1
+        Set<Sommet> composanteCourante = new HashSet<>();
+        List<Graph> composantesFortementConnexes = new ArrayList<>();
+
+        for (int i = ordre.size() - 1; i >= 0; i--) {
+            Sommet sommet = ordre.get(i);
+
+            if (!composanteCourante.contains(sommet)) {
+                Graph composante = new Graph();
+                parcoursEnProfondeur(grapheInverse, sommet, composanteCourante, composante);
+                composantesFortementConnexes.add(composante);
+            }
+        }
+
+        // Étape 4 : Fusionnez les composantes fortement connexes en un seul graphe
+        Graph grapheFortementConnexe = new Graph();
+
+        for (Graph composante : composantesFortementConnexes) {
+            grapheFortementConnexe.fusionner(composante);
+        }
+
+        return grapheFortementConnexe;
     }
+
+    public void fusionner(Graph autreGraphe) {
+        // Fusionner les sommets
+        for (Sommet sommet : autreGraphe.getSommets()) {
+            ajouterSommet(sommet);
+        }
+
+        // Fusionner les arêtes
+        for (Arete arete : autreGraphe.getAretes()) {
+            ajouterArete(arete);
+        }
+    }
+    private void parcoursEnProfondeur(Sommet sommet, Set<Sommet> sommetsVisites, List<Sommet> ordre) {
+        sommetsVisites.add(sommet);
+
+        for (Sommet voisin : obtenirVoisinsNonVisites(sommet, sommetsVisites)) {
+            parcoursEnProfondeur(voisin, sommetsVisites, ordre);
+        }
+
+        ordre.add(sommet);
+    }
+
+    private Graph inverserAretes() {
+        Graph grapheInverse = new Graph();
+
+        for (Sommet sommet : sommets) {
+            grapheInverse.ajouterSommet(sommet);
+        }
+
+        for (Arete arete : aretes) {
+            grapheInverse.ajouterArete(new Arete(arete.sommet2, arete.sommet1, arete.temps));
+        }
+
+        return grapheInverse;
+    }
+
+    public int obtenirPoidsArete(Sommet sommetDeDepart, Sommet sommetDarrivee) {
+        for (Arete arete : aretes) {
+            if ((arete.sommet1.equals(sommetDeDepart) && arete.sommet2.equals(sommetDarrivee)) ||
+                    (arete.sommet1.equals(sommetDarrivee) && arete.sommet2.equals(sommetDeDepart))) {
+                return arete.temps;
+            }
+        }
+        // Si l'arête n'est pas trouvée, vous pouvez renvoyer une valeur par défaut ou lever une exception.
+        return -1; // Par exemple, -1 pour indiquer que l'arête n'existe pas.
+    }
+
+
+    private void parcoursEnProfondeur(Graph graphe, Sommet sommet, Set<Sommet> composanteCourante, Graph composante) {
+        composanteCourante.add(sommet);
+        composante.ajouterSommet(sommet);
+
+        for (Sommet voisin : graphe.obtenirVoisinsNonVisites(sommet, composanteCourante)) {
+            composante.ajouterSommet(voisin);
+            composante.ajouterArete(new Arete(sommet, voisin, graphe.obtenirPoidsArete(sommet, voisin)));
+
+            parcoursEnProfondeur(graphe, voisin, composanteCourante, composante);
+        }
+    }
+
+
+
+
 
 
 

@@ -102,13 +102,14 @@ public class Start {
 
 
         // Obtenez la liste des arêtes du graphe
-        List<Arete> aretes = graph.getAretes();
+        //List<Arete> aretes = graph.getAretes();
 
 // Obtenez les deux sommets dont vous souhaitez vérifier la connexion
         //Sommet sommet1 = graph.recherche(13)/* Obtenez le premier sommet */;
         //Sommet sommet2 = graph.recherche(14);/* Obtenez le deuxième sommet */;
 
 // Vérifiez s'il existe une arête reliant les deux sommets
+
         try (BufferedReader br = new BufferedReader(new FileReader("metroE.txt"))) {
             String ligne;
             while ((ligne = br.readLine()) != null) {
@@ -139,31 +140,26 @@ public class Start {
             e.printStackTrace();
         }
 
-        /*
-        List <Arete> aretesAlle = graph.getAretes();
-        List <Arete> all = null;
-        for (Arete arete : aretesAlle) {
-            Arete retour = new Arete(arete.getSommet2(), arete.getSommet1(), 1);
 
-            all.add(retour);
-
-
-        }graph.getAretes().addAll(all);
-        */
 
 
         // Vous pouvez maintenant effectuer des opérations sur votre graphe
         // ...
 
         // Par exemple, trouver le plus court chemin entre deux sommets
-        Sommet source = graph.recherche(113);/* Votre sommet source */;
-        Sommet cible =graph.recherche(360); /* Votre sommet cible */;
-        System.out.println(graph.getAretes().size());
-        graph.ajouterAretesInverses();
-        System.out.println(graph.ajouterAretesInverses().getAretes().size());
-        graph.trouverPlusCourtsChemins(source, cible);
 
-        graph.bellmanFord(source, cible);
+
+
+        Sommet source = graph.recherche(67);/* Votre sommet source */;
+        Sommet cible =graph.recherche(24); /* Votre sommet cible */;
+        //System.out.println("Existe arete : "+ "source : " + source.nom +  "cible : " + cible.nom+ graph.recherche(10)+" "+graph.existeAreteEntreSommets(source, cible));
+        //System.out.println(graph.getAretes().size());
+
+        //System.out.println(graph.nombreAretesEntreSommets(source, cible));
+        graph.rendreFortementConnexe(graph.recherche(67)).bellmanFord(graph.recherche(67), graph.recherche(24));
+        //graph.bellmanFord(source, cible);
+        //graph.rendreFortementConnexe().trouverPlusCourtsChemins(source, cible);
+
 
 
     }

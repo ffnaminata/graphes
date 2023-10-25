@@ -1,3 +1,4 @@
+0000;Abbesses;12;False;0
 0001;Alexandre Dumas;2;False;0
 0002;Alma Marceau;9;False;0
 0003;Alésia;4;False;0
@@ -182,7 +183,7 @@
 0178;Mairie d'Issy;12;True;0
 0179;Mairie d'Ivry;7;True;1
 
-0180;Mairie de Clichy;13;False,2
+0180;Mairie de Clichy;13;False;2
 0181;Mairie de Montreuil;9;True;0
 0182;Mairie de Saint-Ouen;13;False;1
 0183;Mairie des Lilas;11;True;0
@@ -290,7 +291,7 @@
 0278;Porte des Lilas;11;False;0
 0279;Porte des Lilas;3bis;True;0
 0280;Pré-Saint-Gervais;7bis;True;0
-0281Pyramides;14;False;0
+0281;Pyramides;14;False;0
 0282;Pyramides;7;False;0
 0283;Pyrénées;11;False;0
 0284;Père Lachaise;2;False;0
@@ -308,7 +309,7 @@
 0296;Reuilly Diderot;8;False;0
 0297;Richard Lenoir;5;False;0
 0298;Richelieu Drouot;8;False;0
-0299Richelieu Drouot;9;False;0
+0299;Richelieu Drouot;9;False;0
 0300;Riquet;7;False;0
 0301;Robespierre;9;False;0
 0302;Rome;2;False;0
@@ -325,7 +326,7 @@
 0313;République;5;False;0
 0314;République;8;False;0
 0315;République;9;False;0
-0316,Saint-Ambroise;9;False;0
+0316;Saint-Ambroise;9;False;0
 0317;Saint-Augustin;9;False;0
 0318;Saint-Denis-Porte de Paris;13;False;1
 0319;Saint-Denis-Université;13;True;1
