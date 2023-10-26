@@ -72,7 +72,7 @@ public class Start {
 
 
 
-        Graph graph = new Graph("metroV.txt", "metroE.txt"); // Assurez-vous d'avoir les fichiers sommets.txt et aretes.txt
+        Graph graph = new Graph("metroV.txt", "metroE.txt", new Sommet(34,"Botzaris","7bis",false,0),new Sommet(92,"Danube","7bis",false,0)); // Assurez-vous d'avoir les fichiers sommets.txt et aretes.txt
 
 
 
@@ -143,6 +143,8 @@ public class Start {
 
 
 
+
+
         // Vous pouvez maintenant effectuer des opérations sur votre graphe
         // ...
 
@@ -156,12 +158,17 @@ public class Start {
         //System.out.println(graph.getAretes().size());
 
         //System.out.println(graph.nombreAretesEntreSommets(source, cible));
-        graph.rendreFortementConnexe(graph.recherche(67)).bellmanFord(graph.recherche(67), graph.recherche(24));
+
+        //graph.bellmanFord(graph.recherche(100), graph.recherche(200));
+
+        //graph.rendreFortementConnexe().bellmanFord2(graph.recherche(242),graph.recherche(363));
+        //graph.bellmanFord2(graph.recherche(242),graph.recherche(363));
+        //graph.rendreFortementConnexe().bellmanFord(graph.recherche(92), graph.recherche(34));
+
         //graph.bellmanFord(source, cible);
         //graph.rendreFortementConnexe().trouverPlusCourtsChemins(source, cible);
-
-
-
+        graph.bellmanFordNonOriente(graph.recherche(280),graph.recherche(247));
+        
     }
 
 }

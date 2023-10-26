@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -7,6 +8,20 @@ public class Graph {
 
     private List<Sommet> sommets;
     private List<Arete> aretes;
+
+    public Sommet SommetSource;
+
+    public Sommet getSommetSource() {
+        return SommetSource;
+    }
+
+    public Sommet SommetCible;
+
+    public Sommet getSommetCible() {
+        return SommetCible;
+    }
+
+    ;
 
     public List<Sommet> getSommets() {
         return sommets;
@@ -30,9 +45,11 @@ public class Graph {
 
 
 
-    Graph(String nomFichierSommets, String nomFichierAretes ){
+    Graph(String nomFichierSommets, String nomFichierAretes, Sommet source, Sommet cible  ){
         sommets = lireSommetsDepuisFichier(nomFichierSommets);
         aretes = lireAretesDepuisFichier(nomFichierSommets, nomFichierAretes);
+        this.SommetSource = source;
+        this.SommetCible = cible;
     }
 
     public static void afficherSommets(List<Sommet> sommets) {
@@ -192,7 +209,7 @@ public class Graph {
             return;
         }
 
-        // Initialfisation des distances
+        // Initialisation des distances
         Map<Sommet, Integer> distances = new HashMap<>();
         Map<Sommet, Sommet> predecesseurs = new HashMap<>();
 
@@ -238,6 +255,58 @@ public class Graph {
         System.out.println();
     }
 
+
+    public void bellmanFord2(Sommet source, Sommet cible) {
+        Map<Sommet, Integer> distances = new HashMap<>();
+        Map<Sommet, Sommet> predecesseurs = new HashMap<>();
+
+        // Initialisation des distances
+        for (Sommet sommet : sommets) {
+            distances.put(sommet, Integer.MAX_VALUE);
+            predecesseurs.put(sommet, null);
+        }
+        distances.put(source, 0);
+
+        // Relaxation des arêtes pour V-1 itérations
+        for (int i = 0; i < sommets.size() - 1; i++) {
+            for (Arete arete : aretes) {
+                Sommet sommet1 = arete.sommet1;
+                Sommet sommet2 = arete.sommet2;
+                int poids = arete.temps;
+
+                if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
+                    distances.put(sommet2, distances.get(sommet1) + poids);
+                    predecesseurs.put(sommet2, sommet1);
+                }
+            }
+        }
+
+        // Vérification des cycles négatifs
+        for (Arete arete : aretes) {
+            Sommet sommet1 = arete.sommet1;
+            Sommet sommet2 = arete.sommet2;
+            int poids = arete.temps;
+
+            if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
+                System.out.println("Le graphe contient un cycle de poids négatif.");
+                return;
+            }
+        }
+
+        // Recherche du chemin le plus court
+        List<Sommet> chemin = new ArrayList<>();
+        Sommet sommetCourant = cible;
+
+        while (sommetCourant != null) {
+            chemin.add(sommetCourant);
+            sommetCourant = predecesseurs.get(sommetCourant);
+        }
+
+        Collections.reverse(chemin);
+
+        System.out.println("Distance minimale depuis " + source.nom + " vers " + cible.nom + ": " + distances.get(cible));
+        System.out.println("Chemin le plus court : " + chemin);
+    }
 
     public void trouverPlusCourtsChemins(Sommet source, Sommet cible) {
         // Assurez-vous que les sommets source et cible existent dans la liste des sommets
@@ -319,13 +388,13 @@ public class Graph {
 
 
 
-    public Graph rendreFortementConnexe(Sommet sommetSource) {
+    public Graph rendreFortementConnexe() {
         // Étape 1 : Exécutez une recherche en profondeur (DFS) pour obtenir l'ordre des sommets dans le graphe original
         List<Sommet> ordre = new ArrayList<>(); //On créer une liste de sommet qui s'appelle ordre
         Set<Sommet> sommetsVisites = new HashSet<>();
 
-        if (!sommetSource.equals(sommets.get(0))) {
-            parcoursEnProfondeur(sommetSource, sommetsVisites, ordre);
+        if (!this.getSommetSource().equals(sommets.get(0))) {
+            parcoursEnProfondeur(this.getSommetSource(), sommetsVisites, ordre);
         }
 
         for (Sommet sommet : sommets) {
@@ -334,8 +403,11 @@ public class Graph {
             }
         }
 
+
         // Étape 2 : Inverser les arêtes du graphe
         Graph grapheInverse = inverserAretes();
+
+
 
         // Étape 3 : Exécutez une nouvelle DFS sur le graphe inversé en utilisant l'ordre obtenu à l'étape 1
         Set<Sommet> composanteCourante = new HashSet<>();
@@ -358,8 +430,16 @@ public class Graph {
             grapheFortementConnexe.fusionner(composante);
         }
 
+
+        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(34), this.recherche(92),37 ));
+        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(92), this.recherche(280),43 ));
+        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(280), this.recherche(248),57 ));
+        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(248), this.recherche(34),36));
+
         return grapheFortementConnexe;
     }
+
+
 
     public void fusionner(Graph autreGraphe) {
         // Fusionner les sommets
@@ -390,8 +470,24 @@ public class Graph {
         }
 
         for (Arete arete : aretes) {
+
+
+            if (arete.sommet1.equals( this.recherche(34)) && arete.sommet2.equals(this.recherche(92))
+            || (arete.sommet1.equals( this.recherche(92)) && arete.sommet2.equals(this.recherche(280)))) {
+                continue;
+            }
             grapheInverse.ajouterArete(new Arete(arete.sommet2, arete.sommet1, arete.temps));
+
+             /*
+            if (arete.sommet1.equals( this.recherche(34)) && arete.sommet2.equals(this.recherche(92))){
+                grapheInverse.aretes.remove(new Arete(this.recherche(34), this.recherche(92),37));
+            }if (arete.sommet1.equals( this.recherche(92)) && arete.sommet2.equals(this.recherche(280))){
+                grapheInverse.aretes.remove(new Arete(this.recherche(92),this.recherche(280), 57));
+            }*/
         }
+
+        List<Arete> list = grapheInverse.getAretes();
+        System.out.println(list.toString());
 
         return grapheInverse;
     }
@@ -421,6 +517,51 @@ public class Graph {
     }
 
 
+     public void bellmanFordNonOriente(Sommet source, Sommet cible) {
+        Map<Sommet, Integer> distances = new HashMap<>();
+        Map<Sommet, Sommet> predecesseurs = new HashMap<>();
+
+        // Initialisation des distances
+        for (Sommet sommet : sommets) {
+            distances.put(sommet, Integer.MAX_VALUE);
+            predecesseurs.put(sommet, null);
+        }
+        distances.put(source, 0);
+
+        // Relaxation des arêtes pour V-1 itérations
+        for (int i = 0; i < sommets.size() - 1; i++) {
+            for (Arete arete : aretes) {
+                Sommet sommet1 = arete.sommet1;
+                Sommet sommet2 = arete.sommet2;
+                int poids = arete.temps;
+
+                if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
+                    distances.put(sommet2, distances.get(sommet1) + poids);
+                    predecesseurs.put(sommet2, sommet1);
+                }
+
+                // Traitez l'arête dans l'autre sens (non orienté)
+                if (distances.get(sommet2) != Integer.MAX_VALUE && distances.get(sommet2) + poids < distances.get(sommet1)) {
+                    distances.put(sommet1, distances.get(sommet2) + poids);
+                    predecesseurs.put(sommet1, sommet2);
+                }
+            }
+        }
+
+        // Recherche du chemin le plus court
+        List<Sommet> chemin = new ArrayList<>();
+        Sommet sommetCourant = cible;
+
+        while (sommetCourant != null) {
+            chemin.add(sommetCourant);
+            sommetCourant = predecesseurs.get(sommetCourant);
+        }
+
+        Collections.reverse(chemin);
+
+        System.out.println("Distance minimale depuis " + source.nom + " vers " + cible.nom + ": " + distances.get(cible));
+        System.out.println("Chemin le plus court : " + chemin);
+    }
 
 
 
