@@ -6,34 +6,19 @@ import java.util.*;
 
 public class Graph {
 
-    private List<Sommet> sommets;
-    private List<Arete> aretes;
+    private List<Sommet> sommets = new ArrayList<>();
+    private List<Arete> aretes = new ArrayList<>();
 
-    public Sommet SommetSource;
 
-    public Sommet getSommetSource() {
-        return SommetSource;
-    }
-
-    public Sommet SommetCible;
-
-    public Sommet getSommetCible() {
-        return SommetCible;
-    }
-
-    ;
 
     public List<Sommet> getSommets() {
         return sommets;
     }
 
-    public List<Arete> getAretes(){
+    public List<Arete> getAretes() {
         return aretes;
     }
-    Graph() {
-        sommets = new ArrayList<>();
-        aretes = new ArrayList<>();
-    }
+
 
     public void ajouterSommet(Sommet sommet) {
         this.sommets.add(sommet);
@@ -43,39 +28,31 @@ public class Graph {
         this.aretes.add(arete);
     }
 
-
-
-    Graph(String nomFichierSommets, String nomFichierAretes, Sommet source, Sommet cible  ){
-        sommets = lireSommetsDepuisFichier(nomFichierSommets);
-        aretes = lireAretesDepuisFichier(nomFichierSommets, nomFichierAretes);
-        this.SommetSource = source;
-        this.SommetCible = cible;
+    Graph() {
+        sommets = new ArrayList<>();
+        aretes = new ArrayList<>();
     }
 
-    public static void afficherSommets(List<Sommet> sommets) {
-        for (Sommet sommet : sommets) {
-            System.out.println("Numéro : " + sommet.numero);
-            System.out.println("Nom : " + sommet.nom);
-            System.out.println("Ligne : " + sommet.ligne);
-            System.out.println("Terminus : " + sommet.terminus);
-            System.out.println("Branchement : " + sommet.branchement);
-            System.out.println();
+
+    Graph(String nomFichierSommets, String nomFichierAretes) {
+        this.sommets = lireSommetsDepuisFichier(nomFichierSommets);
+        this.aretes = lireAretesDepuisFichier(nomFichierSommets, nomFichierAretes);
+
+    }
+
+    Sommet rechercheSommet(int id) {
+        for (Sommet sommet : getSommets()) {
+            if (sommet.numero == id) {
+                return sommet;
+            }
         }
+        return null;
     }
-
-    public static void afficherAretes(List<Arete> aretes){
-        for (Arete arete : aretes){
-            System.out.println("Sommet de départ : " + arete.sommet1.nom);
-            System.out.println("Sommet d'arrivée : " + arete.sommet2.nom);
-            System.out.println("Temps (en secondes) : " + arete.temps);
-            System.out.println();
-        }
-    }
-
 
 
     /**
-     * La méthode permet de créer une liste sommet depuis un fichier
+     * La méthode permet de créer une liste de sommets depuis un fichier
+     *
      * @param nomFichier
      */
     public List<Sommet> lireSommetsDepuisFichier(String nomFichier) {
@@ -107,7 +84,8 @@ public class Graph {
     }
 
     /**
-     * La méthode permet de créer une liste sommet depuis un fichier
+     * La méthode permet de créer une liste d'arêtes depuis un fichier
+     *
      * @param
      */
     public List<Arete> lireAretesDepuisFichier(String nomFichierSommets, String nomFichierAretes) {
@@ -138,7 +116,7 @@ public class Graph {
                     if (sommet1 != null && sommet2 != null) {
                         Arete arete = new Arete(sommet1, sommet2, temps);
                         //aretes.add(arete);
-                        //ajouterArete(sommet1,sommet2,temps);
+                        this.ajouterArete(new Arete(sommet1,sommet2,temps));
                     }
                 }
             }
@@ -148,33 +126,79 @@ public class Graph {
         return aretes;
     }
 
+    /**
+     *  Ajoute les arêtes du fichiers dans le grpah (liste des arêtes )
+     * @param val nom du fichier
+     */
+    public void ajouteAreteT(String val){
+        try (BufferedReader br = new BufferedReader(new FileReader(val))) {
+            String ligne;
+            while ((ligne = br.readLine()) != null) {
+                String[] tokens = ligne.split(" ");
 
+                if (tokens.length >= 3) {
+                    int numsommet1 = Integer.parseInt(tokens[0]);
+                    int numsommet2 = Integer.parseInt(tokens[1]);
+                    int temps = Integer.parseInt(tokens[2]);
 
+                    Sommet sommet11 = null;
+                    Sommet sommet22 = null;
+
+                    for (Sommet sommet : this.getSommets()) {
+                        if (sommet.numero == numsommet1) {
+                            sommet11 = sommet;
+                        } else if (sommet.numero == numsommet2) {
+                            sommet22 = sommet;
+                        }
+                    }
+
+                    if (sommet11 != null && sommet22 != null) {
+                        this.ajouterArete(new Arete(sommet11, sommet22, temps));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     *
+     * @return true si connexe et false sinon
+     */
     public boolean estConnexe() {
         // Sélectionnez un sommet arbitraire (par exemple, le premier sommet)
-        Sommet sommetDeDepart = sommets.get(0);
+        Sommet sommet1 = sommets.get(0);
 
         // Utilisez BFS pour parcourir le graphe à partir du sommet de départ
         Set<Sommet> sommetsVisites = new HashSet<>();
-        Queue<Sommet> fileAttente = new LinkedList<>();
+        Queue<Sommet> fileSommetsAVisiter = new LinkedList<>();
 
-        fileAttente.add(sommetDeDepart);
-        sommetsVisites.add(sommetDeDepart);
+        fileSommetsAVisiter.add(sommet1);
+       //sommetsVisites.add(sommet1);
 
-        while (!fileAttente.isEmpty()) {
-            Sommet sommetCourant = fileAttente.poll();
+        while (!fileSommetsAVisiter.isEmpty()) {
+            Sommet sommetCourant = fileSommetsAVisiter.poll();
 
             // Pour chaque sommet adjacent non visité, ajoutez-le à la file d'attente
             for (Sommet voisin : obtenirVoisinsNonVisites(sommetCourant, sommetsVisites)) {
-                fileAttente.add(voisin);
+                fileSommetsAVisiter.add(voisin);
                 sommetsVisites.add(voisin);
             }
+
         }
 
         // Si tous les sommets ont été visités, le graphe est connexe
         return sommetsVisites.size() == sommets.size();
     }
 
+    /**
+     * Uilisé par estconnex() pour connaître les voisois non visités du sommet courant
+     * @param sommet
+     * @param sommetsVisites
+     * @return
+     */
     private List<Sommet> obtenirVoisinsNonVisites(Sommet sommet, Set<Sommet> sommetsVisites) {
         List<Sommet> voisins = new ArrayList<>();
 
@@ -182,10 +206,9 @@ public class Graph {
         for (Arete arete : aretes) {
             if (arete.sommet1.equals(sommet) && !sommetsVisites.contains(arete.sommet2)) {
                 voisins.add(arete.sommet2);
-                System.out.println(aretes.get(1).toString());
+
             } else if (arete.sommet2.equals(sommet) && !sommetsVisites.contains(arete.sommet1)) {
                 voisins.add(arete.sommet1);
-                System.out.println(aretes.get(1).toString());
             }
         }
 
@@ -194,373 +217,180 @@ public class Graph {
 
     }
 
-    Sommet recherche(int id){
-        for (Sommet sommet: getSommets()){
-            if (sommet.numero==id){
-                return sommet;
+
+    /**
+     *
+     * @param sommet1
+     * @param sommet2
+     * @return l'arête contenant le sommet 2 et sommet 2 en paramètre
+     */
+    public Arete getArete(Sommet sommet1, Sommet sommet2) {
+        for (Arete arete : aretes) {
+            if ((arete.sommet1.equals(sommet1) && arete.sommet2.equals(sommet2))) {
+                return arete;
             }
         }
         return null;
     }
-    public void bellmanFord(Sommet source, Sommet cible) {
-        // Assurez-vous que les sommets source et cible existent dans la liste des sommets
-        if (!sommets.contains(source) || !sommets.contains(cible)) {
+
+
+    /**
+     *
+     * @return le graph après avoir rajouté toutes les arêtes inverses pour chaque arête sauf pour la cycle de ligne 7bis et le cycle de la ligne 10
+     */
+    public Graph grapheOriente() {
+        Graph grapheOriente = new Graph();
+
+        for (Sommet sommet : this.sommets) {
+            grapheOriente.ajouterSommet(sommet);
+        }
+
+        for (Arete arete : this.aretes) {
+            Arete areteInverse = new Arete(arete.getSommet2(), arete.getSommet1(), arete.temps);
+            grapheOriente.ajouterArete(arete);
+            grapheOriente.ajouterArete(areteInverse);
+        }
+
+        // Botzaris = 34 ; Danube = 94 ; Pré Saint Gervais = 280 ; Place des fêtes = 248 ;
+        List<Integer> numeroSommetsCycle7bis = new ArrayList<>(Arrays.asList(34, 92, 280, 248, 34));
+        List<Sommet> sommetsCycle7bis = new ArrayList<>();
+
+
+        //Recherche sommet à partir de numero et ajout à la liste de sommets
+        for (Integer numeroSommetCycle7bis : numeroSommetsCycle7bis) {
+            for (Sommet sommet : this.sommets) {
+                if (sommet.numero == numeroSommetCycle7bis) {
+                    sommetsCycle7bis.add(sommet);
+                }
+            }
+        }
+
+        for (int i = 0; i < sommetsCycle7bis.size() - 1; i++) {
+            Iterator<Arete> it = grapheOriente.aretes.iterator();
+            while (it.hasNext()) {
+                Arete arete = it.next();
+                if (arete.sommet1.numero == sommetsCycle7bis.get(i).numero && arete.sommet2.numero == sommetsCycle7bis.get(i + 1).numero) {
+                    it.remove(); // Supprimer l'arête en utilisant l'itérateur
+                }
+            }
+        }
+
+
+        // Javel = 145 ; Mirabeau = 201 ; Chardon Lagache = 52 ; Michel Ange Molitor = 198 ; Boulogne Jean Jaures = 36 ; Porte d'Auteuil = 259 ; Michel Ange Auteuil = 196 ; Eglise d'Auteuil = 373 ;
+        List<Integer> numeroSommetsCycle10 = new ArrayList<>(Arrays.asList(145, 201, 52, 198, 36, 259, 196, 373, 145));
+        List<Sommet> sommetsCycle10 = new ArrayList<>();
+
+
+
+        for (Integer numeroSommetCycle10 : numeroSommetsCycle10) {
+            for (Sommet sommet : this.sommets) {
+                if (sommet.numero == numeroSommetCycle10) {
+                    sommetsCycle10.add(sommet);
+                }
+            }
+        }
+
+        for (int i = 0; i < sommetsCycle10.size() - 1; i++) {
+            Iterator<Arete> it = grapheOriente.aretes.iterator();
+            while (it.hasNext()) {
+                Arete arete = it.next();
+                if (arete.sommet1.numero == sommetsCycle10.get(i).numero && arete.sommet2.numero == sommetsCycle10.get(i + 1).numero) {
+                    it.remove(); // Supprimer l'arête en utilisant l'itérateur
+                }
+            }
+        }
+
+        return grapheOriente;
+    }
+
+
+    public void bellmanFord(Sommet SommetDepart, Sommet SommetCible) {
+
+        if (!sommets.contains(SommetDepart) || !sommets.contains(SommetCible)) {
             System.out.println("Le sommet source ou le sommet cible n'existe pas.");
             return;
         }
 
-        // Initialisation des distances
+
         Map<Sommet, Integer> distances = new HashMap<>();
         Map<Sommet, Sommet> predecesseurs = new HashMap<>();
+
 
         for (Sommet sommet : sommets) {
             distances.put(sommet, Integer.MAX_VALUE);
             predecesseurs.put(sommet, null);
         }
-        distances.put(source, 0);
+        distances.put(SommetDepart, 0);
 
-        // Relaxation des arêtes
+
         for (int i = 1; i < sommets.size(); i++) {
             for (Arete arete : aretes) {
                 Sommet sommet1 = arete.sommet1;
                 Sommet sommet2 = arete.sommet2;
                 int poids = arete.temps;
 
-                if (distances.get(sommet1) != null && distances.get(sommet1) + poids < distances.get(sommet2)) {
+                if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
                     distances.put(sommet2, distances.get(sommet1) + poids);
                     predecesseurs.put(sommet2, sommet1);
                 }
             }
         }
 
-        // Vérification des cycles négatifs
-        for (Arete arete : aretes) {
-            Sommet sommet1 = arete.sommet1;
-            Sommet sommet2 = arete.sommet2;
-            int poids = arete.temps;
 
-            if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
-                System.out.println("Le graphe contient un cycle de poids négatif.");
-                return;
-            }
+        List<Sommet> chemin = new ArrayList<>();
+        Sommet sommetCourant = SommetCible;
+
+        while (sommetCourant != null) {
+            chemin.add(sommetCourant);
+            sommetCourant = predecesseurs.get(sommetCourant);
         }
 
-        System.out.println("Chemin le plus court depuis le sommet " + source.nom+ " vers " + cible.nom + ":");
-        System.out.println("Distance = " + distances.get(cible));
-        List<Sommet> chemin = construireChemin(source, cible, predecesseurs);
-        System.out.print("Chemin = ");
+        Collections.reverse(chemin);
+
+        System.out.println("Distance minimale depuis " + SommetDepart.nom + " vers " + SommetCible.nom + ": " + (distances.get(SommetCible)) / 60 + " min");
+        System.out.print("Chemin le plus court : ");
         for (Sommet sommet : chemin) {
-            System.out.print(sommet.nom + " "+sommet.ligne+ " -> ");
+            System.out.print(" ligne " + sommet.ligne + " " + sommet.nom + " -> ");
         }
         System.out.println();
     }
 
+    public List<Arete> prim() {
+        List<Arete> areteArabreMin = new ArrayList<>();
+        List<Sommet> sommetsArbreMin = new ArrayList<>();
+        List<Sommet> sommetsNonInclus = new ArrayList<>(sommets);
 
-    public void bellmanFord2(Sommet source, Sommet cible) {
-        Map<Sommet, Integer> distances = new HashMap<>();
-        Map<Sommet, Sommet> predecesseurs = new HashMap<>();
+       Sommet sommetDepart = sommets.get(0);
+        sommetsNonInclus.remove(sommetDepart);
+        sommetsArbreMin.add(sommetDepart);
 
-        // Initialisation des distances
-        for (Sommet sommet : sommets) {
-            distances.put(sommet, Integer.MAX_VALUE);
-            predecesseurs.put(sommet, null);
-        }
-        distances.put(source, 0);
+        while (!sommetsNonInclus.isEmpty()) {
+            Arete areteMin = null;
+            int poidsMin = Integer.MAX_VALUE;
 
-        // Relaxation des arêtes pour V-1 itérations
-        for (int i = 0; i < sommets.size() - 1; i++) {
-            for (Arete arete : aretes) {
-                Sommet sommet1 = arete.sommet1;
-                Sommet sommet2 = arete.sommet2;
-                int poids = arete.temps;
-
-                if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
-                    distances.put(sommet2, distances.get(sommet1) + poids);
-                    predecesseurs.put(sommet2, sommet1);
+            for (Sommet sommetInclus : sommetsArbreMin) {
+                for (Sommet sommetNonInclus : sommetsNonInclus) {
+                    Arete arete = getArete(sommetInclus, sommetNonInclus);
+                    if (arete != null && arete.temps < poidsMin) {
+                        poidsMin = arete.temps;
+                        areteMin = arete;
+                    }
                 }
             }
-        }
 
-        // Vérification des cycles négatifs
-        for (Arete arete : aretes) {
-            Sommet sommet1 = arete.sommet1;
-            Sommet sommet2 = arete.sommet2;
-            int poids = arete.temps;
-
-            if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
-                System.out.println("Le graphe contient un cycle de poids négatif.");
-                return;
+            if (areteMin != null) {
+                areteArabreMin.add(areteMin);
+                sommetsArbreMin.add(areteMin.sommet2);
+                sommetsNonInclus.remove(areteMin.sommet2);
             }
         }
 
-        // Recherche du chemin le plus court
-        List<Sommet> chemin = new ArrayList<>();
-        Sommet sommetCourant = cible;
-
-        while (sommetCourant != null) {
-            chemin.add(sommetCourant);
-            sommetCourant = predecesseurs.get(sommetCourant);
+        System.out.println("Dernier arbre partiel :");
+        for (Arete arete : areteArabreMin) {
+            System.out.println(arete.sommet1.nom + " - " + arete.sommet2.nom + " : " + arete.temps);
         }
 
-        Collections.reverse(chemin);
-
-        System.out.println("Distance minimale depuis " + source.nom + " vers " + cible.nom + ": " + distances.get(cible));
-        System.out.println("Chemin le plus court : " + chemin);
-    }
-
-    public void trouverPlusCourtsChemins(Sommet source, Sommet cible) {
-        // Assurez-vous que les sommets source et cible existent dans la liste des sommets
-        if (!sommets.contains(source) || !sommets.contains(cible)) {
-            System.out.println("Le sommet source ou le sommet cible n'existe pas.");
-            return;
-        }
-
-        // Initialisation des distances
-        Map<Sommet, Integer> distances = new HashMap<>();
-        Map<Sommet, Sommet> predecesseurs = new HashMap<>();
-
-        for (Sommet sommet : sommets) {
-            distances.put(sommet, Integer.MAX_VALUE);
-            predecesseurs.put(sommet, null);
-        }
-        distances.put(source, 0);
-
-        // Relaxation des arêtes
-        for (int i = 1; i < sommets.size(); i++) {
-            for (Arete arete : aretes) {
-                Sommet sommet1 = arete.sommet1;
-                Sommet sommet2 = arete.sommet2;
-                int poids = arete.temps;
-
-                if (distances.get(sommet1) != null && distances.get(sommet1) + poids < distances.get(sommet2)) {
-                    distances.put(sommet2, distances.get(sommet1) + poids);
-                    predecesseurs.put(sommet2, sommet1);
-                }
-            }
-        }
-
-        // Vérification des cycles négatifs
-        for (Arete arete : aretes) {
-            Sommet sommet1 = arete.sommet1;
-            Sommet sommet2 = arete.sommet2;
-            int poids = arete.temps;
-
-            if (distances.get(sommet1) != null && distances.get(sommet1) + poids < distances.get(sommet2)) {
-                System.out.println("Le graphe contient un cycle de poids négatif.");
-                return;
-            }
-        }
-
-        // Affichage du plus court chemin
-        System.out.println("Chemin le plus court depuis le sommet source " + source.nom + " vers " + cible.nom + ":");
-        Integer distanceCible = distances.get(cible);
-        if (distanceCible == null || distanceCible == Integer.MAX_VALUE) {
-            System.out.println("Aucun chemin trouvé.");
-        } else {
-            List<Sommet> chemin = construireChemin(source, cible, predecesseurs);
-            System.out.println("Distance = " + distanceCible);
-            System.out.println("Chemin = " + chemin);
-        }
-    }
-
-
-
-    private List<Sommet> construireChemin(Sommet source, Sommet cible, Map<Sommet, Sommet> predecesseurs) {
-        List<Sommet> chemin = new ArrayList<>();
-        Sommet sommetCourant = cible;
-
-
-
-        while (sommetCourant != null) {
-            chemin.add(sommetCourant);
-            sommetCourant = predecesseurs.get(sommetCourant);
-
-            if (sommetCourant == source) {
-                chemin.add(sommetCourant);
-                break; // Arrêtez si le sommet courant est le sommet source
-            }
-        }
-
-
-
-        return chemin;
-    }
-
-
-
-    public Graph rendreFortementConnexe() {
-        // Étape 1 : Exécutez une recherche en profondeur (DFS) pour obtenir l'ordre des sommets dans le graphe original
-        List<Sommet> ordre = new ArrayList<>(); //On créer une liste de sommet qui s'appelle ordre
-        Set<Sommet> sommetsVisites = new HashSet<>();
-
-        if (!this.getSommetSource().equals(sommets.get(0))) {
-            parcoursEnProfondeur(this.getSommetSource(), sommetsVisites, ordre);
-        }
-
-        for (Sommet sommet : sommets) {
-            if (!sommetsVisites.contains(sommet)) {
-                parcoursEnProfondeur(sommet, sommetsVisites, ordre);
-            }
-        }
-
-
-        // Étape 2 : Inverser les arêtes du graphe
-        Graph grapheInverse = inverserAretes();
-
-
-
-        // Étape 3 : Exécutez une nouvelle DFS sur le graphe inversé en utilisant l'ordre obtenu à l'étape 1
-        Set<Sommet> composanteCourante = new HashSet<>();
-        List<Graph> composantesFortementConnexes = new ArrayList<>();
-
-        for (int i = ordre.size() - 1; i >= 0; i--) {
-            Sommet sommet = ordre.get(i);
-
-            if (!composanteCourante.contains(sommet)) {
-                Graph composante = new Graph();
-                parcoursEnProfondeur(grapheInverse, sommet, composanteCourante, composante);
-                composantesFortementConnexes.add(composante);
-            }
-        }
-
-        // Étape 4 : Fusionnez les composantes fortement connexes en un seul graphe
-        Graph grapheFortementConnexe = new Graph();
-
-        for (Graph composante : composantesFortementConnexes) {
-            grapheFortementConnexe.fusionner(composante);
-        }
-
-
-        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(34), this.recherche(92),37 ));
-        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(92), this.recherche(280),43 ));
-        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(280), this.recherche(248),57 ));
-        grapheFortementConnexe.getAretes().remove(new Arete(this.recherche(248), this.recherche(34),36));
-
-        return grapheFortementConnexe;
-    }
-
-
-
-    public void fusionner(Graph autreGraphe) {
-        // Fusionner les sommets
-        for (Sommet sommet : autreGraphe.getSommets()) {
-            ajouterSommet(sommet);
-        }
-
-        // Fusionner les arêtes
-        for (Arete arete : autreGraphe.getAretes()) {
-            ajouterArete(arete);
-        }
-    }
-    private void parcoursEnProfondeur(Sommet sommet, Set<Sommet> sommetsVisites, List<Sommet> ordre) {
-        sommetsVisites.add(sommet);
-
-        for (Sommet voisin : obtenirVoisinsNonVisites(sommet, sommetsVisites)) {
-            parcoursEnProfondeur(voisin, sommetsVisites, ordre);
-        }
-
-        ordre.add(sommet);
-    }
-
-    private Graph inverserAretes() {
-        Graph grapheInverse = new Graph();
-
-        for (Sommet sommet : sommets) {
-            grapheInverse.ajouterSommet(sommet);
-        }
-
-        for (Arete arete : aretes) {
-
-
-            if (arete.sommet1.equals( this.recherche(34)) && arete.sommet2.equals(this.recherche(92))
-            || (arete.sommet1.equals( this.recherche(92)) && arete.sommet2.equals(this.recherche(280)))) {
-                continue;
-            }
-            grapheInverse.ajouterArete(new Arete(arete.sommet2, arete.sommet1, arete.temps));
-
-             /*
-            if (arete.sommet1.equals( this.recherche(34)) && arete.sommet2.equals(this.recherche(92))){
-                grapheInverse.aretes.remove(new Arete(this.recherche(34), this.recherche(92),37));
-            }if (arete.sommet1.equals( this.recherche(92)) && arete.sommet2.equals(this.recherche(280))){
-                grapheInverse.aretes.remove(new Arete(this.recherche(92),this.recherche(280), 57));
-            }*/
-        }
-
-        List<Arete> list = grapheInverse.getAretes();
-        System.out.println(list.toString());
-
-        return grapheInverse;
-    }
-
-    public int obtenirPoidsArete(Sommet sommetDeDepart, Sommet sommetDarrivee) {
-        for (Arete arete : aretes) {
-            if ((arete.sommet1.equals(sommetDeDepart) && arete.sommet2.equals(sommetDarrivee)) ||
-                    (arete.sommet1.equals(sommetDarrivee) && arete.sommet2.equals(sommetDeDepart))) {
-                return arete.temps;
-            }
-        }
-        // Si l'arête n'est pas trouvée, vous pouvez renvoyer une valeur par défaut ou lever une exception.
-        return -1; // Par exemple, -1 pour indiquer que l'arête n'existe pas.
-    }
-
-
-    private void parcoursEnProfondeur(Graph graphe, Sommet sommet, Set<Sommet> composanteCourante, Graph composante) {
-        composanteCourante.add(sommet);
-        composante.ajouterSommet(sommet);
-
-        for (Sommet voisin : graphe.obtenirVoisinsNonVisites(sommet, composanteCourante)) {
-            composante.ajouterSommet(voisin);
-            composante.ajouterArete(new Arete(sommet, voisin, graphe.obtenirPoidsArete(sommet, voisin)));
-
-            parcoursEnProfondeur(graphe, voisin, composanteCourante, composante);
-        }
-    }
-
-
-     public void bellmanFordNonOriente(Sommet source, Sommet cible) {
-        Map<Sommet, Integer> distances = new HashMap<>();
-        Map<Sommet, Sommet> predecesseurs = new HashMap<>();
-
-        // Initialisation des distances
-        for (Sommet sommet : sommets) {
-            distances.put(sommet, Integer.MAX_VALUE);
-            predecesseurs.put(sommet, null);
-        }
-        distances.put(source, 0);
-
-        // Relaxation des arêtes pour V-1 itérations
-        for (int i = 0; i < sommets.size() - 1; i++) {
-            for (Arete arete : aretes) {
-                Sommet sommet1 = arete.sommet1;
-                Sommet sommet2 = arete.sommet2;
-                int poids = arete.temps;
-
-                if (distances.get(sommet1) != Integer.MAX_VALUE && distances.get(sommet1) + poids < distances.get(sommet2)) {
-                    distances.put(sommet2, distances.get(sommet1) + poids);
-                    predecesseurs.put(sommet2, sommet1);
-                }
-
-                // Traitez l'arête dans l'autre sens (non orienté)
-                if (distances.get(sommet2) != Integer.MAX_VALUE && distances.get(sommet2) + poids < distances.get(sommet1)) {
-                    distances.put(sommet1, distances.get(sommet2) + poids);
-                    predecesseurs.put(sommet1, sommet2);
-                }
-            }
-        }
-
-        // Recherche du chemin le plus court
-        List<Sommet> chemin = new ArrayList<>();
-        Sommet sommetCourant = cible;
-
-        while (sommetCourant != null) {
-            chemin.add(sommetCourant);
-            sommetCourant = predecesseurs.get(sommetCourant);
-        }
-
-        Collections.reverse(chemin);
-
-        System.out.println("Distance minimale depuis " + source.nom + " vers " + cible.nom + ": " + distances.get(cible));
-        System.out.println("Chemin le plus court : " + chemin);
+        return areteArabreMin;
     }
 
 
@@ -569,4 +399,3 @@ public class Graph {
 
 
 }
-
